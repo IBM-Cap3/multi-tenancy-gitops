@@ -1,6 +1,6 @@
-# Deploy [Sterling File Gateway](https://developer.ibm.com/components/sterling/tutorials/)
+# Deploy [Sterling File Gateway V6.1.2.2](https://developer.ibm.com/components/sterling/tutorials/)
 
-This recipe is for deploying the B2BI Sterling File Gateway in a single namespace (i.e. `b2bi-prod`): 
+This recipe is for deploying the B2BI Sterling File Gateway in a single namespace (i.e. `b2bi-612`): 
 
 ![SFG single NS](images/sfg-single-ns.png)
 
@@ -15,7 +15,7 @@ This recipe is for deploying the B2BI Sterling File Gateway in a single namespac
     - argocd/consolenotification.yaml
     - argocd/namespace-b2bi-612.yaml
     - argocd/namespace-sealed-secrets.yaml
-    - argocd/serviceaccounts-b2bi-prod.yaml
+    - argocd/serviceaccounts-b2bi-612.yaml
     - argocd/sfg-b2bi-clusterwide.yaml
     ```
 
@@ -55,45 +55,11 @@ This recipe is for deploying the B2BI Sterling File Gateway in a single namespac
 
 2. Modify the B2BI pre-requisites components which includes the secrets and PVCs required for the B2BI helm chart.
 
-    1. Go to the `ibm-sfg-b2bi-prod-setup` directory:
+    1. Go to the `ibm-sfg-b2bi-612-setup` directory:
 
         ```bash
-        cd multi-tenancy-gitops-services/instances/ibm-sfg-b2bi-prod-setup
+        cd multi-tenancy-gitops-services/instances/ibm-sfg-b2bi-612-setup
         ```
-
-    1. Find and open the sfg-b2bi-secrets.sh and modfiy the namespace from "b2bi-prod" to b2bi-612"
-    2. Save and close the file
-    3. Create a new file "ibm-b2bi-rbac.yaml" and add the following role and role binding in it
-        ```bash
-        kind: Role
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-        name: ibm-b2bi-role-b2bi-612
-        namespace: b2bi-612
-        rules:
-        - apiGroups: ['route.openshift.io']
-            resources: ['routes','routes/custom-host']
-            verbs: ['get', 'watch', 'list', 'patch', 'update']
-        - apiGroups: ['','batch']
-            resources: ['secrets','configmaps','persistentvolumes','persistentvolumeclaims','pods','services','cronjobs','jobs']
-            verbs: ['create', 'get', 'list', 'delete', 'patch', 'update']
-
-        ---
-        kind: RoleBinding
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-        name: ibm-b2bi-rolebinding-b2bi-612
-        namespace: b2bi-612
-        subjects:
-        - kind: ServiceAccount
-            name: default
-            namespace: b2bi-612
-        roleRef:
-        kind: Role
-        name: ibm-b2bi-role-b2bi-612
-        apiGroup: rbac.authorization.k8s.io
-        ```
-    4. save and close file
 
     1. Generate a Sealed Secret for the credentials.
         ```bash
@@ -118,7 +84,7 @@ This recipe is for deploying the B2BI Sterling File Gateway in a single namespac
         ```yaml
         - argocd/instances/ibm-sfg-db2-prod.yaml
         - argocd/instances/ibm-sfg-mq-prod.yaml
-        - argocd/instances/ibm-sfg-b2bi-prod-setup.yaml
+        - argocd/instances/ibm-sfg-b2bi-612-setup.yaml
         ```
 
     1. **Optional** Modify the DB2 and MQ storage classes to the environment that you use, the files are in `${GITOPS_PROFILE}/2-services/argocd/instances`. Edit `ibm-sfg-db2-prod.yaml` and `ibm-sfg-mq-prod.yaml` to switch the storageClassName if necessary.
@@ -134,7 +100,7 @@ This recipe is for deploying the B2BI Sterling File Gateway in a single namespac
 1. Generate Helm Chart values.yaml for the Sterling File Gateway Helm Chart in the `multi-tenancy-gitops-services` repo; note that the default storage class is using `managed-nfs-storage` - if you are installing on ODF, set `RWX_STORAGECLASS=ocs-storagecluster-cephfs`.
 
     ```
-    cd multi-tenancy-gitops-services/instances/ibm-sfg-b2bi-prod
+    cd multi-tenancy-gitops-services/instances/ibm-sfg-b2bi-612
     ./ibm-sfg-b2bi-overrides-values.sh
     ```
 
@@ -144,7 +110,7 @@ This recipe is for deploying the B2BI Sterling File Gateway in a single namespac
 1. Edit the Services layer `${GITOPS_PROFILE}/2-services/kustomization.yaml` by uncommenting the following line to install Sterling File Gateway, **commit** and **push** the changes and refresh the `services` Application in the ArgoCD console:
 
     ```yaml
-    - argocd/instances/ibm-sfg-b2bi-prod.yaml
+    - argocd/instances/ibm-sfg-b2bi-612.yaml
     ```
 
     >  💡 **NOTE**  
